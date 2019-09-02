@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn import preprocessing
 from collections import deque
+import numpy as np
 
 main_df = pd.DataFrame()
 
@@ -42,26 +43,29 @@ main_df['target'] = list(map(classify, main_df[f"{stockToPredict}_close"], main_
 dates = main_df.index.values  # Isolating the dates column
 last5pct = dates[-int(0.05*len(dates))]  # Find the date that is 5 percent of the way through the entire set of dates
 
-actualData = main_df[( main_df.index >= last5pct)]  # Isolate the last 5% data from rest of data frame
+actualData = main_df[(main_df.index >= last5pct)]  # Isolate the last 5% data from rest of data frame
 main_df = main_df[main_df.index < last5pct]  # Adjust main data frame to remove data for these dates
 
 
 def preprocessor(df):
     df = df.drop("future", 1)  # Remove actual data so ML model doesn't use this
 
-    for col in df.columns:
-        if col != "target":
-            df[col] = df[col].pct_change()
-            df.dropna(inplace=True)
-            df[col] = preprocessing.scale(df[col].values)
+    for col in df.columns:  # Iterate through each column
+        if col != "target":  # Provided the column is not the target column
+            df[col] = df[col].pct_change()  # Replace each column with data that represents the percentage change in
+            # price from the previous data point
+            df.dropna(inplace=True)  # Remove any null values
+            df[col] = preprocessing.scale(df[col].values)  # Scale each value to between 0 and 1
 
-    df.dropna(inplace=True)
+    df.dropna(inplace=True)  # Remove any additional NaN's
 
     sequentialData = []
-    prevDays = deque(maxlen=dataPoints)
+    prevDays = deque(maxlen=dataPoints)  # Creates a que with max len of 5 years worth of data
 
     for i in df.values:
         prevDays.append([n for n in i[:-1]])  # Iterate through all columns except target
-        if len(prevDays) ==
+        if len(prevDays) == dataPoints:
+            sequentialData.append([np.array(prevDays), i[-1]])
+
 
 preprocessor(main_df)
