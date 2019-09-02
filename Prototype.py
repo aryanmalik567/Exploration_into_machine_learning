@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn import preprocessing
 from collections import deque
 import numpy as np
+import random
 
 main_df = pd.DataFrame()
 
@@ -54,7 +55,7 @@ def preprocessor(df):
         if col != "target":  # Provided the column is not the target column
             df[col] = df[col].pct_change()  # Replace each column with data that represents the percentage change in
             # price from the previous data point
-            df.dropna(inplace=True)  # Remove any null values
+            df.dropna(inplace=True)  # Remove any NaN values
             df[col] = preprocessing.scale(df[col].values)  # Scale each value to between 0 and 1
 
     df.dropna(inplace=True)  # Remove any additional NaN's
@@ -67,5 +68,35 @@ def preprocessor(df):
         if len(prevDays) == dataPoints:
             sequentialData.append([np.array(prevDays), i[-1]])
 
+    random.shuffle(sequentialData)
+
+    buys = []
+    sells = []
+
+    for seq, target in sequentialData:
+        if target == 0:
+            sells.append([seq, target])
+        elif target == 1:
+            buys.append([seq, target])
+
+    random.shuffle(buys)
+    random.shuffle(sells)
+
+    lower = min(len(buys), len(sells))
+
+    buys = buys[:lower]
+    sells = sells[:lower]  # Therefore number of buys and sells are now equal
+
+    sequentialData = buys + sells
+    random.shuffle(sequentialData)  # Very important shuffle otherwise data will be a series of buys followed by sells
+
+    X = []
+    Y = []
+
+    for seq, target in sequentialData:
+        X.append(seq)
+        Y.append(target)
+
 
 preprocessor(main_df)
+#train
