@@ -23,7 +23,10 @@ for stock in stocks:
         main_df = main_df.join(df)
 
 
-dataPoints = (365-104) * 5  # Number of days in a year without weekends x 5
+main_df.fillna(method="ffill", inplace=True)  # if there are gaps in data, use previously known values
+main_df.dropna(inplace=True)
+
+dataPoints = 1305  # Number of days in a year without weekends x 5
 futurePeriodPrediction = 30  # Predict a month into the future
 stockToPredict = "SPY"
 
@@ -93,13 +96,13 @@ def preprocessor(df):
     random.shuffle(sequentialData)  # Very important shuffle otherwise data will be a series of buys followed by sells
 
     X = []
-    Y = []
+    y = []
 
     for seq, target in sequentialData:
         X.append(seq)
-        Y.append(target)
+        y.append(target)
 
-    return np.array(X), Y
+    return np.array(X), y
 
 
 preprocessor(main_df)
