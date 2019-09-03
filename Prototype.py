@@ -47,6 +47,8 @@ last5pct = dates[-int(0.05*len(dates))]  # Find the date that is 5 percent of th
 actualData = main_df[(main_df.index >= last5pct)]  # Isolate the last 5% data from rest of data frame
 main_df = main_df[main_df.index < last5pct]  # Adjust main data frame to remove data for these dates
 
+# print(actualData)
+
 
 def preprocessor(df):
     df = df.drop("future", 1)  # Remove actual data so ML model doesn't use this
@@ -60,8 +62,8 @@ def preprocessor(df):
 
     df.dropna(inplace=True)  # Remove any additional NaN's
 
-    sequentialData = []
-    prevDays = deque(maxlen=dataPoints)  # Creates a que with max len of 5 years worth of data
+    sequentialData = []  # Contains all sequences
+    prevDays = deque(maxlen=dataPoints)  # Shortens whole sequence to only 5 years
 
     for i in df.values:
         prevDays.append([n for n in i[:-1]])  # Iterate through all columns except target
@@ -97,6 +99,14 @@ def preprocessor(df):
         X.append(seq)
         Y.append(target)
 
+    return np.array(X), Y
+
 
 preprocessor(main_df)
-#train
+train_x, train_y = preprocessor(main_df)
+actual_x, actual_y = preprocessor(actualData)
+
+print(f"train data: {len(train_x)} validation: {len(actual_x)}")
+print(f"Don't buys: {train_y.count(0)}, buys: {train_y.count(1)}")
+print(f"VALIDATION Don't buys: {actual_y.count(0)}, buys: {actual_y.count(1)}")
+
