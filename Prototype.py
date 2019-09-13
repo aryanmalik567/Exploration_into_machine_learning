@@ -4,31 +4,12 @@ from collections import deque
 import numpy as np
 import random
 
-main_df = pd.DataFrame()
-
-stocks = ["SPY", "GOOG", "XOM", "GLD"]
-
-for stock in stocks:
-    dataSet = f'Data/{stock}.csv'
-
-    df = pd.read_csv(dataSet)
-    df.rename(columns={"Adj Close": f"{stock}_close", "Volume": f"{stock}_volume"}, inplace=True)
-
-    df.set_index("Date", inplace=True)
-    df = df[[f'{stock}_close', f'{stock}_volume']]
-
-    if len(main_df) == 0:
-        main_df = df
-    else:
-        main_df = main_df.join(df)
-
-
-main_df.fillna(method="ffill", inplace=True)  # if there are gaps in data, use previously known values
-main_df.dropna(inplace=True)
-
 dataPoints = 1305  # Number of days in a year without weekends x 5
-futurePeriodPrediction = 30  # Predict a month into the future
+#futurePeriodPrediction = 30  # Predict a month into the future
 stockToPredict = "SPY"
+
+#dataPoints = 60
+futurePeriodPrediction = 70
 
 
 def classify(current, future):
@@ -36,21 +17,6 @@ def classify(current, future):
         return 1
     else:                               # If stock price has decreased, return positive indicator (0)
         return 0
-
-
-main_df['future'] = main_df[f'{stockToPredict}_close'].shift(-futurePeriodPrediction)
-
-main_df['target'] = list(map(classify, main_df[f"{stockToPredict}_close"], main_df["future"]))
-
-# print(main_df[[f"{stockToPredict}_close", "future", "target"]].head(20))
-
-dates = main_df.index.values  # Isolating the dates column
-last5pct = dates[-int(0.05*len(dates))]  # Find the date that is 5 percent of the way through the entire set of dates
-
-actualData = main_df[(main_df.index >= last5pct)]  # Isolate the last 5% data from rest of data frame
-main_df = main_df[main_df.index < last5pct]  # Adjust main data frame to remove data for these dates
-
-# print(actualData)
 
 
 def preprocessor(df):
@@ -105,7 +71,43 @@ def preprocessor(df):
     return np.array(X), y
 
 
-preprocessor(main_df)
+main_df = pd.DataFrame()
+
+stocks = ["SPY", "GOOG", "XOM", "GLD"]
+
+for stock in stocks:
+    dataSet = f'Data/{stock}.csv'
+
+    df = pd.read_csv(dataSet)
+    df.rename(columns={"Adj Close": f"{stock}_close", "Volume": f"{stock}_volume"}, inplace=True)
+
+    df.set_index("Date", inplace=True)
+    df = df[[f'{stock}_close', f'{stock}_volume']]
+
+    if len(main_df) == 0:
+        main_df = df
+    else:
+        main_df = main_df.join(df)
+
+
+main_df.fillna(method="ffill", inplace=True)  # if there are gaps in data, use previously known values
+main_df.dropna(inplace=True)
+
+main_df['future'] = main_df[f'{stockToPredict}_close'].shift(-futurePeriodPrediction)
+main_df['target'] = list(map(classify, main_df[f"{stockToPredict}_close"], main_df["future"]))
+
+main_df.dropna(inplace=True)
+
+# print(main_df[[f"{stockToPredict}_close", "future", "target"]].head(20))
+
+dates = main_df.index.values  # Isolating the dates column
+last5pct = sorted(main_df.index.values)[-int(0.05*len(dates))]  # Find the date that is 5 percent of the way through the entire set of dates
+
+actualData = main_df[(main_df.index >= last5pct)]  # Isolate the last 5% data from rest of data frame
+main_df = main_df[main_df.index < last5pct]  # Adjust main data frame to remove data for these dates
+
+# print(actualData)
+
 train_x, train_y = preprocessor(main_df)
 actual_x, actual_y = preprocessor(actualData)
 
