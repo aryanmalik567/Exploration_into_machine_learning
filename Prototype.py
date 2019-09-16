@@ -4,12 +4,12 @@ from collections import deque
 import numpy as np
 import random
 
-dataPoints = 1305  # Number of days in a year without weekends x 5
+dataPoints = 100  # 100 days of data
 #futurePeriodPrediction = 30  # Predict a month into the future
 stockToPredict = "SPY"
 
 #dataPoints = 60
-futurePeriodPrediction = 70
+futurePeriodPrediction = 14
 
 
 def classify(current, future):
@@ -30,6 +30,8 @@ def preprocessor(df):
             df[col] = preprocessing.scale(df[col].values)  # Scale each value to between 0 and 1
 
     df.dropna(inplace=True)  # Remove any additional NaN's
+
+    #print(df)
 
     sequentialData = []  # Contains all sequences
     prevDays = deque(maxlen=dataPoints)  # Shortens whole sequence to only 5 years
@@ -61,14 +63,21 @@ def preprocessor(df):
     sequentialData = buys + sells
     random.shuffle(sequentialData)  # Very important shuffle otherwise data will be a series of buys followed by sells
 
+    #print(sequentialData)
+
     X = []
     y = []
 
     for seq, target in sequentialData:
+        #print(seq)
         X.append(seq)
         y.append(target)
 
-    return np.array(X), y
+    X = np.array(X)
+
+    #print(X)
+
+    return X, y
 
 
 main_df = pd.DataFrame()
@@ -101,10 +110,10 @@ main_df.dropna(inplace=True)
 # print(main_df[[f"{stockToPredict}_close", "future", "target"]].head(20))
 
 dates = main_df.index.values  # Isolating the dates column
-last5pct = sorted(main_df.index.values)[-int(0.05*len(dates))]  # Find the date that is 5 percent of the way through the entire set of dates
+last10pct = sorted(main_df.index.values)[-int(0.1*len(dates))]  # Find the date that is 10 percent of the way through the entire set of dates
 
-actualData = main_df[(main_df.index >= last5pct)]  # Isolate the last 5% data from rest of data frame
-main_df = main_df[main_df.index < last5pct]  # Adjust main data frame to remove data for these dates
+actualData = main_df[(main_df.index >= last10pct)]  # Isolate the last 5% data from rest of data frame
+main_df = main_df[main_df.index < last10pct]  # Adjust main data frame to remove data for these dates
 
 # print(actualData)
 
@@ -114,4 +123,8 @@ actual_x, actual_y = preprocessor(actualData)
 print(f"train data: {len(train_x)} validation: {len(actual_x)}")
 print(f"Don't buys: {train_y.count(0)}, buys: {train_y.count(1)}")
 print(f"VALIDATION Don't buys: {actual_y.count(0)}, buys: {actual_y.count(1)}")
+
+#print(f"lenActual: {len(actual_x)}")
+
+
 
