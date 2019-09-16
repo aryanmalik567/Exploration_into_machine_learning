@@ -3,13 +3,16 @@ from sklearn import preprocessing
 from collections import deque
 import numpy as np
 import random
+import time
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
 
 dataPoints = 100  # 100 days of data
-#futurePeriodPrediction = 30  # Predict a month into the future
+futurePeriodPrediction = 14  # Predict 2 weeks into the future
 stockToPredict = "SPY"
-
-#dataPoints = 60
-futurePeriodPrediction = 14
+epochs = 10
+batchSize = 64
+name = f"{dataPoints}-Sequence-{futurePeriodPrediction}-Prediction-{int(time.time())}"
 
 
 def classify(current, future):
