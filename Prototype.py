@@ -6,6 +6,8 @@ import random
 import time
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, LSTM, BatchNormalization
+from tensorflow.keras.callbacks import Tensorboard, ModelCheckpoint
 
 dataPoints = 100  # 100 days of data
 futurePeriodPrediction = 14  # Predict 2 weeks into the future
@@ -127,7 +129,41 @@ print(f"train data: {len(train_x)} validation: {len(actual_x)}")
 print(f"Don't buys: {train_y.count(0)}, buys: {train_y.count(1)}")
 print(f"VALIDATION Don't buys: {actual_y.count(0)}, buys: {actual_y.count(1)}")
 
-#print(f"lenActual: {len(actual_x)}")
+model = Sequential()
+model.add(LSTM(128, input_shape=(train_x.shape[1:]), return_sequences=True))
+model.add(Dropout(0.2))
+model.add(BatchNormalization())
 
+model.add(LSTM(128, input_shape=(train_x.shape[1:]), return_sequences=True))
+model.add(Dropout(0.1))
+model.add(BatchNormalization())
 
+model.add(LSTM(128, input_shape=(train_x.shape[1:]), return_sequences=True))
+model.add(Dropout(0.2))
+model.add(BatchNormalization())
 
+model.add(Dense(32, activation="relu"))
+model.add(Dropout(0.2))
+
+model.add(Dense(2, activation="softmax"))
+
+opt = tf.keras.optimizers.Adam(lr=0.001, decay=1e-6)
+
+model.compile(loss="sparse_categorical_crossentropy",
+              optimizer=opt,
+              metrics=['accuracy'])
+
+tensorboard = Tensorboard(log_dir=f'logs/{NAME}')
+
+filepath = "RNN_Final-{epoch:02d}-{val_acc:.3f}"  # unique file name that will include the epoch and the
+# validation acc for that epoch
+checkpoint = ModelCheckpoint("models/{}.model".format(filepath, monitor='val_acc', verbose=1,
+                                                      save_best_only=True, mode='max'))  # saves only the best ones
+
+history = model.fit(
+    train_x, train_y,
+    batch_size=batchSize,
+    epochs=epochs,
+    validation_data=(actual_x, actual_y),
+    callbacks=[tensorboard, checkpoint],
+)
