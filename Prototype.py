@@ -7,7 +7,7 @@ import time
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, LSTM, BatchNormalization
-from tensorflow.keras.callbacks import Tensorboard, ModelCheckpoint
+from tensorflow.compat.v1.keras.callbacks import Tensorboard, ModelCheckpoint
 
 dataPoints = 100  # 100 days of data
 futurePeriodPrediction = 14  # Predict 2 weeks into the future
@@ -167,3 +167,5 @@ history = model.fit(
     validation_data=(actual_x, actual_y),
     callbacks=[tensorboard, checkpoint],
 )
+
+#model.save("")
