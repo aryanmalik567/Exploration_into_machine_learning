@@ -7,7 +7,8 @@ import time
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, LSTM, BatchNormalization
-from tensorflow.compat.v1.keras.callbacks import Tensorboard, ModelCheckpoint
+from tensorflow.keras.callbacks import TensorBoard
+from tensorflow.keras.callbacks import ModelCheckpoint
 
 dataPoints = 100  # 100 days of data
 futurePeriodPrediction = 14  # Predict 2 weeks into the future
@@ -68,19 +69,14 @@ def preprocessor(df):
     sequentialData = buys + sells
     random.shuffle(sequentialData)  # Very important shuffle otherwise data will be a series of buys followed by sells
 
-    #print(sequentialData)
-
     X = []
     y = []
 
     for seq, target in sequentialData:
-        #print(seq)
         X.append(seq)
         y.append(target)
 
     X = np.array(X)
-
-    #print(X)
 
     return X, y
 
@@ -115,7 +111,8 @@ main_df.dropna(inplace=True)
 # print(main_df[[f"{stockToPredict}_close", "future", "target"]].head(20))
 
 dates = main_df.index.values  # Isolating the dates column
-last10pct = sorted(main_df.index.values)[-int(0.1*len(dates))]  # Find the date that is 10 percent of the way through the entire set of dates
+last10pct = sorted(main_df.index.values)[-int(0.1*len(dates))]  # Find the date that is 10 percent of the way through
+# the entire set of dates
 
 actualData = main_df[(main_df.index >= last10pct)]  # Isolate the last 5% data from rest of data frame
 main_df = main_df[main_df.index < last10pct]  # Adjust main data frame to remove data for these dates
@@ -153,7 +150,7 @@ model.compile(loss="sparse_categorical_crossentropy",
               optimizer=opt,
               metrics=['accuracy'])
 
-tensorboard = Tensorboard(log_dir=f'logs/{NAME}')
+tensorboard = tensorboard(log_dir=f'logs/{NAME}')
 
 filepath = "RNN_Final-{epoch:02d}-{val_acc:.3f}"  # unique file name that will include the epoch and the
 # validation acc for that epoch
@@ -168,4 +165,3 @@ history = model.fit(
     callbacks=[tensorboard, checkpoint],
 )
 
-#model.save("")
