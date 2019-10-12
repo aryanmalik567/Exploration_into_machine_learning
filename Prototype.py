@@ -150,7 +150,7 @@ model.compile(loss="sparse_categorical_crossentropy",
               optimizer=opt,
               metrics=['accuracy'])
 
-tensorboard = tensorboard(log_dir=f'logs/{NAME}')
+tensorboard = TensorBoard(log_dir=f'logs/{name}')
 
 filepath = "RNN_Final-{epoch:02d}-{val_acc:.3f}"  # unique file name that will include the epoch and the
 # validation acc for that epoch
