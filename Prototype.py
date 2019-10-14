@@ -1,14 +1,15 @@
 import pandas as pd
-from sklearn import preprocessing
 from collections import deque
-import numpy as np
 import random
-import time
+import numpy as np
 import tensorflow as tf
+import tensorflow.keras as keras
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, LSTM, BatchNormalization
 from tensorflow.keras.callbacks import TensorBoard
 from tensorflow.keras.callbacks import ModelCheckpoint
+import time
+from sklearn import preprocessing
 
 dataPoints = 100  # 100 days of data
 futurePeriodPrediction = 14  # Predict 2 weeks into the future
@@ -150,7 +151,7 @@ model.compile(loss="sparse_categorical_crossentropy",
               optimizer=opt,
               metrics=['accuracy'])
 
-tensorboard = tensorboard(log_dir=f'logs/{NAME}')
+tensorboard = TensorBoard(log_dir=f'logs/{name}')
 
 filepath = "RNN_Final-{epoch:02d}-{val_acc:.3f}"  # unique file name that will include the epoch and the
 # validation acc for that epoch
@@ -159,9 +160,15 @@ checkpoint = ModelCheckpoint("models/{}.model".format(filepath, monitor='val_acc
 
 history = model.fit(
     train_x, train_y,
-    batch_size=batchSize,
+    batch_size=128,
     epochs=epochs,
     validation_data=(actual_x, actual_y),
     callbacks=[tensorboard, checkpoint],
 )
 
+model.add(keras.layers.Flatten())
+
+score = model.evaluate(actual_x, actual_y, verbose=0)
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])
+model.save("models/{}".format(name))
