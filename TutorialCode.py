@@ -6,7 +6,7 @@ import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, LSTM, BatchNormalization
 from tensorflow.keras.callbacks import TensorBoard
-from tensorflow.keras.callbacks import ModelCheckpoint, ModelCheckpoint
+from tensorflow.keras.callbacks import ModelCheckpoint
 import time
 from sklearn import preprocessing
 
@@ -83,7 +83,6 @@ ratios = ["BTC-USD", "LTC-USD", "BCH-USD", "ETH-USD"]  # the 4 ratios we want to
 for ratio in ratios:  # begin iteration
 
     ratio = ratio.split('.csv')[0]  # split away the ticker from the file-name
-    print(ratio)
     dataset = f'training_datas/{ratio}.csv'  # get the full path to the file.
     df = pd.read_csv(dataset, names=['time', 'low', 'high', 'open', 'close', 'volume'])  # read in specific file
 
