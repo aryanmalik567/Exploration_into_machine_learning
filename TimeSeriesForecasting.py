@@ -129,8 +129,8 @@ simple_lstm_model = tf.keras.models.Sequential([
 
 simple_lstm_model.compile(optimizer='adam', loss='mae')
 
-for x, y in val_univariate.take(1):
-    print(simple_lstm_model.predict(x).shape)
+# for x, y in val_univariate.take(1):
+#    print(simple_lstm_model.predict(x).shape)
 
 EVALUATION_INTERVAL = 200
 EPOCHS = 10
@@ -140,4 +140,19 @@ simple_lstm_model.fit(train_univariate, epochs=EPOCHS,
                       validation_data=val_univariate, validation_steps=50)
 
 for x, y in val_univariate.take(3):
-  plot = show_plot([x[0].numpy(), y[0].numpy(), simple_lstm_model.predict(x)[0]], 0, 'Simple LSTM model')
+    plot = show_plot([x[0].numpy(), y[0].numpy(), simple_lstm_model.predict(x)[0]], 0, 'Simple LSTM model')
+
+
+# Now using more variables to predict
+
+features_considered = ['p (mbar)', 'T (degC)', 'rho (g/m**3)']
+
+features = df[features_considered]
+features.index = df['Date Time']
+features.head()
+
+features.plot(subplots=True)
+
+
+
+
