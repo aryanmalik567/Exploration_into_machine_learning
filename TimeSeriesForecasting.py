@@ -116,6 +116,7 @@ def baseline(history): # Baseline method, taking average of last 20 data points
 BATCH_SIZE = 256
 BUFFER_SIZE = 10000
 
+'''
 train_univariate = tf.data.Dataset.from_tensor_slices((x_train_uni, y_train_uni))
 train_univariate = train_univariate.cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE).repeat()
 
@@ -129,17 +130,20 @@ simple_lstm_model = tf.keras.models.Sequential([
 
 simple_lstm_model.compile(optimizer='adam', loss='mae')
 
-# for x, y in val_univariate.take(1):
-#    print(simple_lstm_model.predict(x).shape)
+for x, y in val_univariate.take(1):
+    print(simple_lstm_model.predict(x).shape)
+
+'''
 
 EVALUATION_INTERVAL = 200
 EPOCHS = 10
 
-# simple_lstm_model.fit(train_univariate, epochs=EPOCHS,  steps_per_epoch=EVALUATION_INTERVAL,  validation_data=val_univariate, validation_steps=50)
+'''
+simple_lstm_model.fit(train_univariate, epochs=EPOCHS,  steps_per_epoch=EVALUATION_INTERVAL,  validation_data=val_univariate, validation_steps=50)
 
-#for x, y in val_univariate.take(3):
-#    plot = show_plot([x[0].numpy(), y[0].numpy(), simple_lstm_model.predict(x)[0]], 0, 'Simple LSTM model')
-
+for x, y in val_univariate.take(3):
+    plot = show_plot([x[0].numpy(), y[0].numpy(), simple_lstm_model.predict(x)[0]], 0, 'Simple LSTM model')
+'''
 
 # Now using more variables to predict
 
@@ -188,9 +192,11 @@ x_train_single, y_train_single = multivariate_data(dataset, dataset[:, 1], 0, TR
 
 x_val_single, y_val_single = multivariate_data(dataset, dataset[:, 1], TRAIN_SPLIT, None, past_history, future_target, STEP, single_step=True)
 
+print(x_train_single)
+
 
 train_data_single = tf.data.Dataset.from_tensor_slices((x_train_single, y_train_single))
-train_data_single = train_data_single.cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE).repeat()
+train_data_single = train_data_single.shuffle(BUFFER_SIZE).batch(BATCH_SIZE).cache().repeat()
 
 val_data_single = tf.data.Dataset.from_tensor_slices((x_val_single, y_val_single))
 val_data_single.batch(BATCH_SIZE).repeat()
