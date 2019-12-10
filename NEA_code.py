@@ -5,7 +5,13 @@ import os
 import pandas as pd
 import quandl
 
-quandl.ApiConfig.api_key = "BzmAGpzByrxtohyARK2B"
-stock = quandl.get("EOD/AAPL")
+stockToRequest = input("Enter stock symbol of stock you would like to fetch: ")
 
-print(stock.head())
+quandl.ApiConfig.api_key = "BzmAGpzByrxtohyARK2B"
+stock = quandl.get(f"EOD/{stockToRequest}")
+stock = pd.DataFrame(stock)
+
+neededColumns = ['Date', 'Adj_Close', 'Adj_Volume']
+stock1 = stock[neededColumns]
+
+print(stock1.head())

@@ -155,7 +155,7 @@ features.head()
 
 features.plot(subplots=True)
 
-#plt.show()
+# plt.show()
 
 dataset = features.values
 data_mean = dataset[:TRAIN_SPLIT].mean(axis=0)
