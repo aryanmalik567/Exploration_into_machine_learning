@@ -11,7 +11,7 @@ quandl.ApiConfig.api_key = "BzmAGpzByrxtohyARK2B"
 stock = quandl.get(f"EOD/{stockToRequest}")
 stock = pd.DataFrame(stock)
 
-neededColumns = ['Date', 'Adj_Close', 'Adj_Volume']
-stock1 = stock[neededColumns]
+neededColumns = ['Adj_Close']  # Just uni-variate to begin with
+stock = stock[neededColumns]
 
-print(stock1.head())
+print(stock.head())
