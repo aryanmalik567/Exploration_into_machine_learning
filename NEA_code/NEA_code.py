@@ -14,4 +14,7 @@ stock = pd.DataFrame(stock)
 neededColumns = ['Adj_Close', 'Adj_Volume']
 stock1 = stock[neededColumns]
 
+stockStd = np.std(stock1)
+stockMean = np.mean(stock1)
+
 
