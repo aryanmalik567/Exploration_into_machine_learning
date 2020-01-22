@@ -22,6 +22,8 @@ first60pct = round(0.6 * numRows)
 stockTrainStd = stock[:first60pct].mean()
 stockTrainMean = stock[:first60pct].std()
 
+stockNormalized = (stock - stockTrainMean) / stockTrainStd
+
 
 
 
