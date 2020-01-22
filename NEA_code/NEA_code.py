@@ -14,4 +14,4 @@ stock = pd.DataFrame(stock)
 neededColumns = ['Adj_Close', 'Adj_Volume']
 stock1 = stock[neededColumns]
 
-print(stock1.head())
+
