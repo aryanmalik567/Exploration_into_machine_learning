@@ -19,12 +19,13 @@ stock = stock[neededColumns]
 numRows = stock.shape[0]
 first60pct = round(0.6 * numRows)
 
-stockTrainStd = stock[:first60pct].mean()
-stockTrainMean = stock[:first60pct].std()
+stockTrain = stock[:first60pct]
+stockTrainStd = stockTrain.mean()
+stockTrainMean = stockTrain.std()
 
-stockNormalized = (stock - stockTrainMean) / stockTrainStd
+stockNormalized = (stockTrain - stockTrainMean) / stockTrainStd
 
-
+# print(stockNormalized.shape) gives (654, 2)
 
 
 
