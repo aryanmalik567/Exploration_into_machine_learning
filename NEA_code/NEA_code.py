@@ -31,28 +31,32 @@ stockTrain = stock[:first80pct]
 stockTrainMean = stockTrain.mean()
 stockTrainStd = stockTrain.std()
 
-stockTrainNormalized = (stockTrain - stockTrainMean) / stockTrainStd
+stockTrainStandardized = (stockTrain - stockTrainMean) / stockTrainStd
 
-# print(stockTrainNormalized.shape) gives (872, 1)
+# print(stockTrainStandardized.shape) gives (872, 1)
 
 # Creating 20% testing split
 last20pct = round(0.2 * numRows)
 
-stockTest = stock[first80pct:last20pct]
-stockTestMean = stockTest.mean()
-stockTestStd = stockTest.std()
+stockVal = stock[first80pct:last20pct]
+stockValMean = stockVal.mean()
+stockValStd = stockVal.std()
 
-stockValNormalized = (stockTest - stockTestMean) / stockTestStd
+stockValNormalized = (stockVal - stockValMean) / stockValStd
 
 dataPoints = 300  # 300 time steps worth of training data for each sequence
 futurePeriodPrediction = 30  # Predicting 30 time steps into the future in each sequence
 
-x_train = []  # List containing several sequences each of time step length 300
-y_train = []  # List containing several sequences each of time step length 30
+x_train = []  # List containing several sequences each of time step length 300, training data
+y_train = []  # List containing several sequences each of time step length 30, validation data
 
-for i in range(dataPoints, len(stockTrainNormalized)):
-    x_train.append(stockTrainNormalized[i - dataPoints:i])
-    y_train.append(stockTrainNormalized[i, 0])
+for x in range(dataPoints, len(stockTrainStandardized)):  # From 300 to 872
+    x_train.append(stockTrainStandardized[x - dataPoints:x])  # Append 300 time steps from range 0 to 572
 
+for y in range(futurePeriodPrediction, (len(stockTrainStandardized) - (dataPoints - futurePeriodPrediction))):  # From 30 to 572
+    y_train.append(stockTrainStandardized[y - futurePeriodPrediction:y])
+
+print(len(x_train))
+print(len(y_train))
 
 
