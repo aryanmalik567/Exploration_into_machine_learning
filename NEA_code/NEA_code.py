@@ -59,4 +59,11 @@ for y in range(futurePeriodPrediction, (len(stockTrainStandardized) - (dataPoint
 print(len(x_train))
 print(len(y_train))
 
+print(len(x_train[0]))
+print(len(y_train[0]))
+
+print(x_train[0])
+print(y_train[0])
+
+
 
