@@ -50,11 +50,11 @@ futurePeriodPrediction = 30  # Predicting 30 time steps into the future in each 
 x_train = []  # List containing several sequences each of time step length 300, training data
 y_train = []  # List containing several sequences each of time step length 30, validation data
 
-for x in range(dataPoints, len(stockTrainStandardized)):  # From 300 to 872
-    x_train.append(stockTrainStandardized[x - dataPoints:x])  # Append 300 time steps from range 0 to 572
+for x in range(dataPoints, (len(stockTrainStandardized) - futurePeriodPrediction)):  # From 300 to 842
+    x_train.append(stockTrainStandardized[x - dataPoints:x])  # Append 300 time steps from range 0 to 542
 
-for y in range(futurePeriodPrediction, (len(stockTrainStandardized) - (dataPoints - futurePeriodPrediction))):  # From 30 to 572
-    y_train.append(stockTrainStandardized[y - futurePeriodPrediction:y])
+for y in range(dataPoints, (len(stockTrainStandardized) - futurePeriodPrediction)):  # From 30 to 842
+    y_train.append(stockTrainStandardized[y:y + futurePeriodPrediction])  # Append 30 time steps from range 30 to 572
 
 print(len(x_train))
 print(len(y_train))
@@ -62,8 +62,8 @@ print(len(y_train))
 print(len(x_train[0]))
 print(len(y_train[0]))
 
-print(x_train[0])
-print(y_train[0])
+print(x_train[541])
+print(y_train[541])
 
 
 
