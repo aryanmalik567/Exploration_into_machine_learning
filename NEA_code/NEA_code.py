@@ -4,6 +4,7 @@ import numpy as np
 import os
 import pandas as pd
 import quandl
+import tensorflow as tf
 
 # stockToRequest = input("Enter stock symbol of stock you would like to fetch: ")
 
@@ -15,6 +16,9 @@ stock = pd.DataFrame(stock)
 neededColumns = ['Adj_Close']  # Add in volume later
 stock = stock[neededColumns]
 
+dataPoints = 300  # 300 time steps worth of training data for each sequence
+futurePeriodPrediction = 30  # Predicting 30 time steps into the future in each sequence
+
 '''
 # Visualizing our data to begin with
 plt.plot(stock)
@@ -23,47 +27,37 @@ plt.ylabel('AdjClose')
 plt.show()
 '''
 
-# Creating 80% train split
+# Creating train split
 numRows = stock.shape[0]
-first80pct = round(0.8 * numRows)
+trainSplit = numRows - futurePeriodPrediction - dataPoints
 
-stockTrain = stock[:first80pct]
+stockTrain = stock[:trainSplit]
 stockTrainMean = stockTrain.mean()
 stockTrainStd = stockTrain.std()
 
 stockTrainStandardized = (stockTrain - stockTrainMean) / stockTrainStd
 
-# print(stockTrainStandardized.shape) gives (872, 1)
+# print(stockTrainStandardized.shape) gives (760, 1)
 
-# Creating 20% testing split
-last20pct = round(0.2 * numRows)
+# Creating testing split
+stockTest = stock[trainSplit:numRows]
+stockTestMean = stockTest.mean()
+stockTestStd = stockTest.std()
 
-stockVal = stock[first80pct:last20pct]
-stockValMean = stockVal.mean()
-stockValStd = stockVal.std()
+stockTestNormalized = (stockTest - stockTestMean) / stockTestStd
 
-stockValNormalized = (stockVal - stockValMean) / stockValStd
-
-dataPoints = 300  # 300 time steps worth of training data for each sequence
-futurePeriodPrediction = 30  # Predicting 30 time steps into the future in each sequence
+# print(stockTestNormalized.shape) gives (330, 1)
 
 x_train = []  # List containing several sequences each of time step length 300, training data
 y_train = []  # List containing several sequences each of time step length 30, validation data
 
-for x in range(dataPoints, (len(stockTrainStandardized) - futurePeriodPrediction)):  # From 300 to 842
-    x_train.append(stockTrainStandardized[x - dataPoints:x])  # Append 300 time steps from range 0 to 542
+for x in range(dataPoints, (len(stockTrainStandardized) - futurePeriodPrediction)):  # From 300 to 730
+    x_train.append(stockTrainStandardized[x - dataPoints:x])  # Append 300 time steps from range 0 to 460
 
-for y in range(dataPoints, (len(stockTrainStandardized) - futurePeriodPrediction)):  # From 30 to 842
-    y_train.append(stockTrainStandardized[y:y + futurePeriodPrediction])  # Append 30 time steps from range 30 to 572
+for y in range(dataPoints, (len(stockTrainStandardized) - futurePeriodPrediction)):  # From 30 to 760
+    y_train.append(stockTrainStandardized[y:y + futurePeriodPrediction])  # Append 30 time steps from range 30 to 490
 
-print(len(x_train))
-print(len(y_train))
-
-print(len(x_train[0]))
-print(len(y_train[0]))
-
-print(x_train[541])
-print(y_train[541])
-
+BATCH_SIZE = 256
+BUFFER_SIZE = 10000
 
 
