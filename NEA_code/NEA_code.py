@@ -5,27 +5,28 @@ import os
 import pandas as pd
 import quandl
 import tensorflow as tf
+import random
+from pandas.plotting import register_matplotlib_converters
+register_matplotlib_converters()
 
 # stockToRequest = input("Enter stock symbol of stock you would like to fetch: ")
 
 quandl.ApiConfig.api_key = "BzmAGpzByrxtohyARK2B"
 # stock = quandl.get(f"EOD/{stockToRequest}")
-stock = quandl.get(f"EOD/AAPL")
+stock = quandl.get(f"EOD/MSFT")
 stock = pd.DataFrame(stock)
 
-neededColumns = ['Adj_Close']  # Add in volume later
+neededColumns = ['Open', 'High', 'Low', 'Close', 'Volume']
 stock = stock[neededColumns]
 
 dataPoints = 300  # 300 time steps worth of training data for each sequence
 futurePeriodPrediction = 30  # Predicting 30 time steps into the future in each sequence
 
-'''
 # Visualizing our data to begin with
-plt.plot(stock)
+plt.plot(stock['Close'])
 plt.xlabel('Date')
-plt.ylabel('AdjClose')
-plt.show()
-'''
+plt.ylabel('Close')
+# plt.show()
 
 # Creating train split
 numRows = stock.shape[0]
@@ -37,7 +38,7 @@ stockTrainStd = stockTrain.std()
 
 stockTrainStandardized = (stockTrain - stockTrainMean) / stockTrainStd
 
-# print(stockTrainStandardized.shape) gives (760, 1)
+# print(stockTrainStandardized.shape) gives (760, 5)
 
 # Creating testing split
 stockTest = stock[trainSplit:numRows]
@@ -46,7 +47,7 @@ stockTestStd = stockTest.std()
 
 stockTestNormalized = (stockTest - stockTestMean) / stockTestStd
 
-# print(stockTestNormalized.shape) gives (330, 1)
+# print(stockTestNormalized.shape) gives (330, 5)
 
 x_train = []  # List containing several sequences each of time step length 300, training data
 y_train = []  # List containing several sequences each of time step length 30, validation data
@@ -57,7 +58,9 @@ for x in range(dataPoints, (len(stockTrainStandardized) - futurePeriodPrediction
 for y in range(dataPoints, (len(stockTrainStandardized) - futurePeriodPrediction)):  # From 30 to 760
     y_train.append(stockTrainStandardized[y:y + futurePeriodPrediction])  # Append 30 time steps from range 30 to 490
 
+x_test = stockTestNormalized[:dataPoints]
+y_test = stockTestNormalized[dataPoints:(dataPoints + futurePeriodPrediction)]
+
 BATCH_SIZE = 256
 BUFFER_SIZE = 10000
-
 
