@@ -8,6 +8,7 @@ import tensorflow as tf
 import random
 from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # stockToRequest = input("Enter stock symbol of stock you would like to fetch: ")
 
@@ -80,15 +81,16 @@ def sequencer(dataset, dataset_length, history_size, target_size):
 
 x_train, y_train = sequencer(stockTrainStandardized, len(stockTrainStandardized), dataPoints, futurePeriodPrediction)
 
-# x_train = np.array(x_train)
-
 x_test = stockTestStandardized[:dataPoints]  # First 300 time steps of test sequence
 y_test = stockTestStandardized[dataPoints:(dataPoints + futurePeriodPrediction)]
+
+x_test = np.array(x_test)
+y_test = np.array(y_test)
 
 BATCH_SIZE = 300
 BUFFER_SIZE = 10000
 
-'''
+
 train_data = tf.data.Dataset.from_tensor_slices((x_train, y_train))
 train_data = train_data.cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE).repeat()
 
@@ -101,11 +103,17 @@ stockModel.add(tf.keras.layers.LSTM(16, activation='relu'))
 stockModel.add(tf.keras.layers.Dense(30))
 
 stockModel.compile(optimizer='adam', loss='mean_squared_error')
-stockModel.fit(x_train, y_train, epochs=100, batch_size=BATCH_SIZE)
-'''
+stockModel.fit(train_data, validation_data=test_data, epochs=100, batch_size=BATCH_SIZE)
 
-print(len(x_train))
-print(len(x_train[1]))
+
+print(x_train.shape)
+print(y_train.shape)
+
+print(x_test.shape)
+print(y_test.shape)
+
+print(x_test[1])
 print(x_train.shape[-2:])
+
 
 
