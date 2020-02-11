@@ -38,6 +38,8 @@ stockTrainStd = stockTrain.std()
 
 stockTrainStandardized = (stockTrain - stockTrainMean) / stockTrainStd
 
+stockTrainStandardized = np.array(stockTrainStandardized)
+
 # print(stockTrainStandardized.shape) gives (760, 5)
 
 # Creating testing split
@@ -45,23 +47,43 @@ stockTest = stock[trainSplit:numRows]
 stockTestMean = stockTest.mean()
 stockTestStd = stockTest.std()
 
-stockTestNormalized = (stockTest - stockTestMean) / stockTestStd
+stockTestStandardized = (stockTest - stockTestMean) / stockTestStd
 
 # print(stockTestNormalized.shape) gives (330, 5)
-
+'''
 x_train = []  # List containing several sequences each of time step length 300, training data
 y_train = []  # List containing several sequences each of time step length 30, validation data
+'''
 
+'''
 for x in range(dataPoints, (len(stockTrainStandardized) - futurePeriodPrediction)):  # From 300 to 730
     x_train.append(stockTrainStandardized[x - dataPoints:x])  # Append 300 time steps from range 0 to 460
 
+for y in range(dataPoints, (len(stockTrainStandardized) - futurePeriodPrediction)):  # From 300 to 730
+    y_train.append(stockTrainStandardized[y:y + futurePeriodPrediction])  # Append 30 time steps from range 300 to 730
+'''
+
+
+def sequencer(dataset, dataset_length, history_size, target_size):
+    training_data = []
+    target_data = []
+
+    for i in range(history_size, (dataset_length - target_size)):
+        indices_x = range(i-history_size, i)
+        training_data.append(dataset[indices_x])
+
+        indices_y = range(i, i + target_size)
+        target_data.append(dataset[indices_y])
+
+    return np.array(training_data), np.array(target_data)
+
+
+x_train, y_train = sequencer(stockTrainStandardized, len(stockTrainStandardized), dataPoints, futurePeriodPrediction)
+
 # x_train = np.array(x_train)
 
-for y in range(dataPoints, (len(stockTrainStandardized) - futurePeriodPrediction)):  # From 30 to 760
-    y_train.append(stockTrainStandardized[y:y + futurePeriodPrediction])  # Append 30 time steps from range 30 to 490
-
-x_test = stockTestNormalized[:dataPoints]  # First 300 time steps of test sequence
-y_test = stockTestNormalized[dataPoints:(dataPoints + futurePeriodPrediction)]
+x_test = stockTestStandardized[:dataPoints]  # First 300 time steps of test sequence
+y_test = stockTestStandardized[dataPoints:(dataPoints + futurePeriodPrediction)]
 
 BATCH_SIZE = 300
 BUFFER_SIZE = 10000
@@ -83,5 +105,7 @@ stockModel.fit(x_train, y_train, epochs=100, batch_size=BATCH_SIZE)
 '''
 
 print(len(x_train))
-print(len(x_train[1][1]))
+print(len(x_train[1]))
+print(x_train.shape[-2:])
+
 
