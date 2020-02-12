@@ -81,6 +81,9 @@ def sequencer(dataset, dataset_length, history_size, target_size):
 
 x_train, y_train = sequencer(stockTrainStandardized, len(stockTrainStandardized), dataPoints, futurePeriodPrediction)
 
+np.swapaxes(x_train, 0, 2)
+np.swapaxes(y_train, 0, 2)
+
 x_test = stockTestStandardized[:dataPoints]  # First 300 time steps of test sequence
 y_test = stockTestStandardized[dataPoints:(dataPoints + futurePeriodPrediction)]
 
@@ -91,10 +94,10 @@ BATCH_SIZE = 300
 BUFFER_SIZE = 10000
 
 
-train_data = tf.data.Dataset.from_tensor_slices((x_train, y_train))
+train_data = tf.data.Dataset.from_tensors((x_train, y_train))
 train_data = train_data.cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE).repeat()
 
-test_data = tf.data.Dataset.from_tensor_slices((x_test, y_test))
+test_data = tf.data.Dataset.from_tensors((x_test, y_test))
 test_data = test_data.batch(BATCH_SIZE).repeat()
 
 stockModel = tf.keras.models.Sequential()
@@ -103,17 +106,6 @@ stockModel.add(tf.keras.layers.LSTM(16, activation='relu'))
 stockModel.add(tf.keras.layers.Dense(30))
 
 stockModel.compile(optimizer='adam', loss='mean_squared_error')
-stockModel.fit(train_data, validation_data=test_data, epochs=100, batch_size=BATCH_SIZE)
-
-
-print(x_train.shape)
-print(y_train.shape)
-
-print(x_test.shape)
-print(y_test.shape)
-
-print(x_test[1])
-print(x_train.shape[-2:])
-
+stockModel.fit(train_data, validation_data=test_data, epochs=100)  # , batch_size=BATCH_SIZE
 
 
