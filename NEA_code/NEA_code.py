@@ -96,10 +96,7 @@ y_test = np.reshape(y_test, (1, 30, 5))
 BATCH_SIZE = 300
 BUFFER_SIZE = 10000
 
-print(x_test[0][299])
-print(y_test[0][29])
 
-'''
 train_data = tf.data.Dataset.from_tensor_slices((x_train, y_train))
 train_data = train_data.cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE).repeat()
 
@@ -111,6 +108,7 @@ stockModel.add(tf.keras.layers.LSTM(32, return_sequences=True, input_shape=x_tra
 stockModel.add(tf.keras.layers.LSTM(16, activation='relu'))
 stockModel.add(tf.keras.layers.Dense(30))
 
-stockModel.compile(optimizer='adam', loss='mean_squared_error')
+# stockModel.compile(optimizer='adam', loss='mean_squared_error')
+stockModel.compile(optimizer=tf.keras.optimizers.RMSprop(clipvalue=1.0), loss='mae')
 stockModel.fit(train_data,  epochs=10, steps_per_epoch=200, validation_data=test_data, validation_steps=50)
-'''
+
