@@ -2,13 +2,13 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import pandas as pd
 import quandl
 import tensorflow as tf
 import random
 from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # stockToRequest = input("Enter stock symbol of stock you would like to fetch: ")
 
@@ -96,6 +96,8 @@ y_test = np.reshape(y_test, (1, 30, 5))
 BATCH_SIZE = 300
 BUFFER_SIZE = 10000
 
+EpochSteps = 200
+EPOCHS = 10
 
 train_data = tf.data.Dataset.from_tensor_slices((x_train, y_train))
 train_data = train_data.cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE).repeat()
@@ -110,5 +112,5 @@ stockModel.add(tf.keras.layers.Dense(30))
 
 # stockModel.compile(optimizer='adam', loss='mean_squared_error')
 stockModel.compile(optimizer=tf.keras.optimizers.RMSprop(clipvalue=1.0), loss='mae')
-stockModel.fit(train_data,  epochs=10, steps_per_epoch=200, validation_data=test_data, validation_steps=50)
+stockModelHistory = stockModel.fit(train_data, epochs=EPOCHS, steps_per_epoch=EpochSteps, validation_data=test_data, validation_steps=50)
 

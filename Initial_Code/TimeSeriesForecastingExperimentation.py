@@ -1,10 +1,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
-
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 import pandas as pd
 
 mpl.rcParams['figure.figsize'] = (8, 6)
@@ -36,10 +36,10 @@ def multivariate_data(dataset, target, start_index, end_index, history_size,
         indices = range(i-history_size, i, step)
         data.append(dataset[indices])
 
-    if single_step:
-        labels.append(target[i+target_size])
-    else:
-        labels.append(target[i:i+target_size])
+        if single_step:
+            labels.append(target[i+target_size])
+        else:
+            labels.append(target[i:i+target_size])
 
     return np.array(data), np.array(labels)
 
@@ -90,10 +90,9 @@ def multi_step_plot(history, true_future, prediction):
     plt.show()
 
 
+'''
 multi_step_model = tf.keras.models.Sequential()
-multi_step_model.add(tf.keras.layers.LSTM(32,
-                                          return_sequences=True,
-                                          input_shape=x_train_multi.shape[-2:]))
+multi_step_model.add(tf.keras.layers.LSTM(32, return_sequences=True, input_shape=x_train_multi.shape[-2:]))
 multi_step_model.add(tf.keras.layers.LSTM(16, activation='relu'))
 multi_step_model.add(tf.keras.layers.Dense(72))
 
@@ -102,8 +101,11 @@ multi_step_model.compile(optimizer=tf.keras.optimizers.RMSprop(clipvalue=1.0), l
 for x, y in val_data_multi.take(1):
     print(multi_step_model.predict(x).shape)
 
-multi_step_history = multi_step_model.fit(train_data_multi, epochs=EPOCHS, steps_per_epoch=EVALUATION_INTERVAL,
-                                          validation_data=val_data_multi, validation_steps=50)
+multi_step_history = multi_step_model.fit(train_data_multi, epochs=EPOCHS, steps_per_epoch=EVALUATION_INTERVAL, validation_data=val_data_multi, validation_steps=50)
 
 for x, y in val_data_multi.take(3):
     multi_step_plot(x[0], y[0], multi_step_model.predict(x)[0])
+'''
+
+print(x_val_multi.shape)
+print(y_val_multi.shape)
