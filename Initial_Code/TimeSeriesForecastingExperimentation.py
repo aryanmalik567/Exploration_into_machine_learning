@@ -89,7 +89,6 @@ def multi_step_plot(history, true_future, prediction):
     plt.legend(loc='upper left')
     plt.show()
 
-
 '''
 multi_step_model = tf.keras.models.Sequential()
 multi_step_model.add(tf.keras.layers.LSTM(32, return_sequences=True, input_shape=x_train_multi.shape[-2:]))
@@ -106,8 +105,7 @@ multi_step_history = multi_step_model.fit(train_data_multi, epochs=EPOCHS, steps
 for x, y in val_data_multi.take(3):
     multi_step_plot(x[0], y[0], multi_step_model.predict(x)[0])
 '''
+
 print(x_train_multi.shape)
-print(x_val_multi.shape)
-print(y_train_multi.shape)
-print(y_val_multi.shape)
+
 

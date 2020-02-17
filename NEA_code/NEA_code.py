@@ -24,10 +24,12 @@ dataPoints = 300  # 300 time steps worth of training data for each sequence
 futurePeriodPrediction = 30  # Predicting 30 time steps into the future in each sequence
 
 # Visualizing our data to begin with
+'''
 plt.plot(stock['Close'])
 plt.xlabel('Date')
 plt.ylabel('Close')
-# plt.show()
+plt.show()
+'''
 
 # Creating train split
 numRows = stock.shape[0]
@@ -106,8 +108,21 @@ EpochSteps = 200
 EPOCHS = 10
 
 
+def plot_output(history, actual_future, prediction):
+    plt.figure(figsize=(12, 6))
+    history_range = list(range(-len(history[:, 4]), 0))
+    future_range = list(range(0, len(actual_future)))
+
+    plt.plot(history_range, np.array(history[:, 4]), label='History')
+    plt.plot(future_range, np.array(actual_future), color='cyan', label='Actual Future')
+    plt.plot(future_range, np.array(prediction), color='red', label='Prediction')
+
+    plt.legend(loc='upper left')
+    plt.show()
+
+
 train_data = tf.data.Dataset.from_tensor_slices((x_train, y_train))
-train_data = train_data.cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE).repeat()
+train_data = train_data.cache().batch(BATCH_SIZE).repeat()
 
 test_data = tf.data.Dataset.from_tensor_slices((x_test, y_test))
 test_data = test_data.batch(BATCH_SIZE).repeat()
@@ -119,6 +134,10 @@ stockModel.add(tf.keras.layers.Dense(30))
 
 # stockModel.compile(optimizer='adam', loss='mean_squared_error')
 stockModel.compile(optimizer=tf.keras.optimizers.RMSprop(clipvalue=1.0), loss='mae')
-stockModelHistory = stockModel.fit(train_data, epochs=EPOCHS, steps_per_epoch=EpochSteps, validation_data=test_data, validation_steps=50)
+stockModelHistory = stockModel.fit(train_data, epochs=EPOCHS, steps_per_epoch=50, validation_data=test_data, validation_steps=10)
 
+# plot_output(x_test, y_test, stockModel.predict(x_test))
+
+for x, y in test_data:
+    plot_output(x[0], y[0], stockModel.predict(x)[0])
 
