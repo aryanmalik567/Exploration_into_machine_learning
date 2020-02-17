@@ -104,8 +104,8 @@ y_test = np.reshape(y_test, (1, 30))
 BATCH_SIZE = 300
 BUFFER_SIZE = 10000
 
-EpochSteps = 200
-EPOCHS = 10
+EpochSteps = 50
+EPOCHS = 20
 
 
 def plot_output(history, actual_future, prediction):
@@ -134,10 +134,12 @@ stockModel.add(tf.keras.layers.Dense(30))
 
 # stockModel.compile(optimizer='adam', loss='mean_squared_error')
 stockModel.compile(optimizer=tf.keras.optimizers.RMSprop(clipvalue=1.0), loss='mae')
-stockModelHistory = stockModel.fit(train_data, epochs=EPOCHS, steps_per_epoch=50, validation_data=test_data, validation_steps=10)
+stockModelHistory = stockModel.fit(train_data, epochs=EPOCHS, steps_per_epoch=EpochSteps, validation_data=test_data, validation_steps=10)
 
 # plot_output(x_test, y_test, stockModel.predict(x_test))
 
-for x, y in test_data:
+for x, y in test_data.take(1):
     plot_output(x[0], y[0], stockModel.predict(x)[0])
+
+
 
