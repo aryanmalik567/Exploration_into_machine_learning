@@ -106,6 +106,8 @@ multi_step_history = multi_step_model.fit(train_data_multi, epochs=EPOCHS, steps
 for x, y in val_data_multi.take(3):
     multi_step_plot(x[0], y[0], multi_step_model.predict(x)[0])
 '''
-
+print(x_train_multi.shape)
 print(x_val_multi.shape)
+print(y_train_multi.shape)
 print(y_val_multi.shape)
+

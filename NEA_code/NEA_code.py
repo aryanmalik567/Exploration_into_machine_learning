@@ -50,6 +50,8 @@ stockTestStd = stockTest.std()
 
 stockTestStandardized = (stockTest - stockTestMean) / stockTestStd
 
+stockTestStandardized = np.array(stockTestStandardized)
+
 # print(stockTestNormalized.shape) gives (330, 5)
 '''
 x_train = []  # List containing several sequences each of time step length 300, training data
@@ -65,39 +67,44 @@ for y in range(dataPoints, (len(stockTrainStandardized) - futurePeriodPrediction
 '''
 
 
-def sequencer(dataset, dataset_length, history_size, target_size):
+def sequencer(dataset, history_size, target_size):
     training_data = []
     target_data = []
 
-    for i in range(history_size, (dataset_length - target_size)):
+    target_dataset = dataset[:, 4]
+
+    for i in range(history_size, (len(dataset) - target_size)):
         indices_x = range(i-history_size, i)
         training_data.append(dataset[indices_x])
 
         indices_y = range(i, i + target_size)
-        target_data.append(dataset[indices_y])
+        target_data.append(target_dataset[indices_y])
 
     return np.array(training_data), np.array(target_data)
 
 
-x_train, y_train = sequencer(stockTrainStandardized, len(stockTrainStandardized), dataPoints, futurePeriodPrediction)
+x_train, y_train = sequencer(stockTrainStandardized, dataPoints, futurePeriodPrediction)
 
 np.swapaxes(x_train, 0, 2)
-np.swapaxes(y_train, 0, 2)
+# np.swapaxes(y_train, 0, 2)
 
 x_test = stockTestStandardized[:dataPoints]  # First 300 time steps of test sequence
+
+stockTestStandardized = stockTestStandardized[:, 4]
 y_test = stockTestStandardized[dataPoints:(dataPoints + futurePeriodPrediction)]
 
 x_test = np.array(x_test)
 y_test = np.array(y_test)
 
 x_test = np.reshape(x_test, (1, 300, 5))
-y_test = np.reshape(y_test, (1, 30, 5))
+y_test = np.reshape(y_test, (1, 30))
 
 BATCH_SIZE = 300
 BUFFER_SIZE = 10000
 
 EpochSteps = 200
 EPOCHS = 10
+
 
 train_data = tf.data.Dataset.from_tensor_slices((x_train, y_train))
 train_data = train_data.cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE).repeat()
@@ -113,4 +120,5 @@ stockModel.add(tf.keras.layers.Dense(30))
 # stockModel.compile(optimizer='adam', loss='mean_squared_error')
 stockModel.compile(optimizer=tf.keras.optimizers.RMSprop(clipvalue=1.0), loss='mae')
 stockModelHistory = stockModel.fit(train_data, epochs=EPOCHS, steps_per_epoch=EpochSteps, validation_data=test_data, validation_steps=50)
+
 
