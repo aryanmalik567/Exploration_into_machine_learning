@@ -148,6 +148,8 @@ def train_model(x_train, y_train, x_test, y_test, epochs, epoch_steps, trial_num
               )
         print("")
 
+        stockModel.save(f'Model{trial_num}.h5')
+
 
 def main():
     stock = quandl_request()
