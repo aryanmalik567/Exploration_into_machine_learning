@@ -11,28 +11,23 @@ register_matplotlib_converters()
 quandl.ApiConfig.api_key = "BzmAGpzByrxtohyARK2B"
 
 
-modelTrial = 1  # First model
-
-
-def const_selector(model_number):
+def epoch_consts(model_number):
     epochs_list = [10, 20, 30, 40]
     epochSteps_list = [40, 30, 20, 10]
 
-    return epochs_list[model_number], epochSteps_list[model_number]
+    return epochs_list[model_number - 1], epochSteps_list[model_number - 1]
 
 
 class Constants:
-    def __init__(self, past_period, future_period, batch_size, buffer_size, epochs, epoch_steps, val_steps):
+    def __init__(self, past_period, future_period, batch_size, buffer_size, val_steps):
         self.past_period = past_period
         self.future_period = future_period
         self.batch_size = batch_size
         self.buffer_size = buffer_size
-        self.epochs = epochs
-        self.epoch_steps = epoch_steps
         self.val_steps = val_steps
 
 
-consts = Constants(300, 30, 300, 10000, const_selector()[0], const_selector()[1], 10)
+consts = Constants(300, 30, 300, 10000, 10)
 
 
 def quandl_request():
@@ -117,9 +112,17 @@ def plot_output(history, actual_future, prediction):
     plt.show()
 
 
-def train_model(x_train, y_train, x_test, y_test):
+def rmse(predicted, actual):
+    return np.sqrt(np.mean((predicted - actual) ** 2))
+
+
+def mape(predicted, actual):
+    return (np.mean(abs(predicted - actual) / abs(actual))) * 100
+
+
+def train_model(x_train, y_train, x_test, y_test, epochs, epoch_steps, trial_num):
     train_data = tf.data.Dataset.from_tensor_slices((x_train, y_train))
-    train_data = train_data.cache().batch(consts.batch_size).repeat()
+    train_data = train_data.batch(consts.batch_size).repeat()
 
     test_data = tf.data.Dataset.from_tensor_slices((x_test, y_test))
     test_data = test_data.batch(consts.batch_size).repeat()
@@ -131,19 +134,31 @@ def train_model(x_train, y_train, x_test, y_test):
 
     # stockModel.compile(optimizer='adam', loss='mean_squared_error')
     stockModel.compile(optimizer=tf.keras.optimizers.RMSprop(clipvalue=1.0), loss='mae')
-    stockModelHistory = stockModel.fit(train_data, epochs=consts.epochs, steps_per_epoch=consts.epoch_steps, validation_data=test_data, validation_steps=consts.val_steps)
+    stockModel.fit(train_data, epochs=epochs, steps_per_epoch=epoch_steps,
+                   validation_data=test_data, validation_steps=consts.val_steps)
 
     # plot_output(x_test, y_test, stockModel.predict(x_test))
 
     for x, y in test_data.take(1):
         plot_output(x[0], y[0], stockModel.predict(x)[0])
+        print("")
+        print("Model " + str(trial_num) +
+              " RMSE: " + str(rmse(y[0], stockModel.predict(x)[0])) +
+              " MAPE: " + str(mape(y[0], stockModel.predict(x)[0]))
+              )
+        print("")
 
 
 def main():
     stock = quandl_request()
     train_test = data_split(stock)
     xy_arrays = x_y(train_test[0], train_test[1])
-    train_model(xy_arrays[0], xy_arrays[1], xy_arrays[2], xy_arrays[3])
+
+    modelTrial = 1  # First model
+    while modelTrial < 5:
+        train_model(xy_arrays[0], xy_arrays[1], xy_arrays[2], xy_arrays[3],
+                    epoch_consts(modelTrial)[0], epoch_consts(modelTrial)[1], modelTrial)
+        modelTrial += 1
 
 
 main()
